@@ -67,7 +67,7 @@
 
 ### **4. Auth component**
 
-![Warmhouse Component Auth](diagrams/component/Warmhoust_Auth_Component.png)
+![Warmhouse Component Auth](diagrams/component/Warmhoust_Auth_component.png)
 
 ### **5. Monitoring component**
 
