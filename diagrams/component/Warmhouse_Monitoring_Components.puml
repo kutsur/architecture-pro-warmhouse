@@ -1,0 +1,37 @@
+@startuml
+title Компонентная диаграмма - Микросервис мониторинга
+
+top to bottom direction
+
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+
+Container_Boundary(worker_microservice, "Микросервис мониторинга") {
+  Component(worker_scheduler, "Scheduler", "GO, Cron", "Запускает периодические задачи проверки датчиков и устройств")
+  Component(monitoring_service, "Monitoring Service", "GO", "Основная логика проверки состояния устройств и температуры")
+  Component(device_client, "Device Client", "WebSockets", "Получает данные с устройств и отправляет команды")
+  Component(sensor_client, "Sensor Client", "WebSockets", "Получает данные с датчиков")
+  Component(alert_service, "Alert Service", "GO", "Обрабатывает ошибки и аномалии")
+  Component(device_repository, "Device Repository", "PostgreSQL", "Работа с данными устройств и их статусом")
+}
+
+System_Ext(devices_database, "Devices Database", "PostgreSQL")
+System_Ext(emails_microservice, "Emails Microservice", "PHP")
+System_Ext(sensor, "Sensor", "Сущность")
+System_Ext(device, "Device", "Сущность")
+
+Rel(worker_scheduler, monitoring_service, "Триггерит задачи")
+
+Rel(monitoring_service, sensor_client, "Запрашивает данные")
+Rel(monitoring_service, device_client, "Запрашивает / отправляет команды")
+
+Rel(sensor_client, sensor, "Получает данные")
+Rel(device_client, device, "Получает данные / управление")
+
+Rel(monitoring_service, device_repository, "Чтение / обновление статусов")
+Rel(device_repository, devices_database, "SQL")
+
+Rel(monitoring_service, alert_service, "Передает ошибки и события")
+
+Rel(alert_service, emails_microservice, "Уведомления")
+
+@enduml

@@ -1,0 +1,28 @@
+@startuml
+title Компонентная диаграмма - Микросервис авторизации
+
+top to bottom direction
+
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+
+Container_Boundary(auth_microservice, "Микросервис авторизации") {
+  Component(api_controller, "API Controller", "NestJS", "Принимает запросы на логин, регистрацию и обновление токена")
+  Component(auth_service, "Auth Service", "NestJS", "Бизнес-логика авторизации и управления сессиями")
+  Component(jwt_provider, "JWT Provider", "JWT", "Генерация и валидация access/refresh токенов")
+  Component(auth0_adapter, "Auth0 Adapter", "Auth0 SDK", "Интеграция с внешним провайдером авторизации")
+  Component(user_repository, "User Repository", "PostgreSQL", "Работа с данными пользователя и сессиями")
+}
+
+System_Ext(entry_point, "API Entry Point", "Gateway")
+System_Ext(user_database, "User Database", "PostgreSQL")
+
+Rel(entry_point, api_controller, "REST / WebSocket")
+
+Rel(api_controller, auth_service, "Вызывает")
+Rel(auth_service, jwt_provider, "Генерация / проверка токенов")
+Rel(auth_service, auth0_adapter, "Авторизация пользователя")
+Rel(auth_service, user_repository, "Чтение/запись пользователя")
+
+Rel(user_repository, user_database, "SQL")
+
+@enduml

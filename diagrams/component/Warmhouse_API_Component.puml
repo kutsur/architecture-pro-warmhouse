@@ -1,0 +1,37 @@
+@startuml
+title Компонентная диаграмма - API Entry Point
+
+top to bottom direction
+
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+
+Container_Boundary(api_entry_point, "API Entry Point") {
+  Component(api_controller, "API Controller", "NodeJS (Express/NestJS)", "Единая точка входа для client приложений")
+  Component(auth_middleware, "Auth Middleware", "JWT / Auth0", "Проверка токена и аутентификация запросов")
+  Component(request_router, "Request Router", "NodeJS", "Маршрутизация запросов в нужные микросервисы")
+  Component(websocket_gateway, "WebSocket Gateway", "Socket.IO / WS", "Поддержка realtime соединений")
+  Component(response_aggregator, "Response Aggregator", "NodeJS", "Агрегация данных из нескольких сервисов")
+}
+
+System_Ext(client_apps, "Client Apps", "Web / Mobile")
+System_Ext(auth_microservice, "Auth Microservice", "NestJS")
+System_Ext(devices_microservice, "Devices Microservice", "GO")
+System_Ext(billing_microservice, "Billing Microservice", "Java")
+
+Rel(client_apps, api_controller, "REST / WebSocket")
+
+Rel(api_controller, auth_middleware, "Проверка запроса")
+Rel(auth_middleware, auth_microservice, "Валидация токена")
+
+Rel(api_controller, request_router, "Передает запрос")
+
+Rel(request_router, devices_microservice, "Device API")
+Rel(request_router, billing_microservice, "Billing API")
+
+Rel(api_controller, websocket_gateway, "Realtime соединение")
+Rel(websocket_gateway, devices_microservice, "Подписка на события")
+
+Rel(request_router, response_aggregator, "Сбор данных")
+Rel(response_aggregator, api_controller, "Ответ клиенту")
+
+@enduml
