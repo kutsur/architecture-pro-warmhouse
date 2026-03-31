@@ -1,0 +1,117 @@
+openapi: 3.0.3
+info:
+  title: Monitoring Service API
+  version: 1.0.0
+
+servers:
+  - url: https://monitoring.api.warmhouse.local
+
+paths:
+  /sensors/{sensorId}:
+    get:
+      summary: Получить сенсор
+      parameters:
+        - name: sensorId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Сенсор найден
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Sensor"
+        "404":
+          description: Сенсор не найдено
+
+  /sensors/{sensorId}/telemetry:
+    get:
+      summary: Получить телеметрию
+      parameters:
+        - name: sensorId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: from
+          in: query
+          schema:
+            type: string
+            format: date-time
+        - name: to
+          in: query
+          schema:
+            type: string
+            format: date-time
+      responses:
+        "200":
+          description: Телеметрия
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Telemetry"
+        "404":
+          description: Сенсор не найден
+
+  /alerts:
+    get:
+      summary: Получить алерты
+      responses:
+        "200":
+          description: Список алертов
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AlertList"
+
+components:
+  schemas:
+    Sensor:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        type:
+          type: string
+          enum: [TEMPERATURE, HUMIDITY]
+        value:
+          type: number
+        status:
+          type: boolean
+
+    Telemetry:
+      type: object
+      properties:
+        sensorId:
+          type: string
+        data:
+          type: array
+          items:
+            type: object
+            properties:
+              timestamp:
+                type: string
+                format: date-time
+              value:
+                type: number
+
+    AlertList:
+      type: array
+      items:
+        type: object
+        properties:
+          deviceId:
+            type: string
+          sensorId:
+            type: string
+          type:
+            type: string
+          severity:
+            type: string
+          message:
+            type: string

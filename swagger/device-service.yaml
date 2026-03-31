@@ -1,0 +1,118 @@
+openapi: 3.0.3
+info:
+  title: Device Service API
+  version: 1.0.0
+
+servers:
+  - url: https://device.api.warmhouse.local
+
+paths:
+  /devices/{deviceId}:
+    get:
+      summary: Получить устройство
+      parameters:
+        - name: deviceId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Устройство найдено
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Device"
+        "404":
+          description: Устройство не найдено
+
+  /devices/{deviceId}/actions:
+    post:
+      summary: Выполнить действие
+      parameters:
+        - name: deviceId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ActionRequest"
+      responses:
+        "200":
+          description: Успешно
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ActionResponse"
+        "400":
+          description: Ошибка запроса
+        "404":
+          description: Устройство не найдено
+
+  /devices/{deviceId}/state:
+    get:
+      summary: Получить состояние устройства
+      parameters:
+        - name: deviceId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Состояние
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DeviceState"
+        "404":
+          description: Устройство не найдено
+
+components:
+  schemas:
+    Device:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        state:
+          type: string
+          enum: [ON, OFF, ERROR]
+
+    ActionRequest:
+      type: object
+      properties:
+        action:
+          type: string
+          enum: [TURN_ON, TURN_OFF, TOGGLE]
+      required:
+        - action
+
+    ActionResponse:
+      type: object
+      properties:
+        deviceId:
+          type: string
+        state:
+          type: string
+
+    DeviceState:
+      type: object
+      properties:
+        deviceId:
+          type: string
+        state:
+          type: string
+        updatedAt:
+          type: string
+          format: date-time
