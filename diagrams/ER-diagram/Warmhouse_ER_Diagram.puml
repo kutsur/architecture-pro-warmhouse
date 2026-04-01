@@ -1,0 +1,82 @@
+@startuml
+title Warmhouse ER диаграмма (Управление и мониторинг)
+
+entity "User" as users {
+  + id : uuid
+  + name : text
+  + email : text
+}
+
+entity "House" as houses {
+  + id : uuid
+  + name : text
+  + address : text
+  + user_id : uuid
+}
+
+entity "DeviceRouter" as router {
+  + id : uuid
+  + name : text
+  + house_id : uuid
+}
+
+entity "DeviceType" as device_types {
+  + id : uuid
+  + name : text
+}
+
+entity "Device" as devices {
+  + id : uuid
+  + name : text
+  + serial_number : text
+  + state : enum
+  + hub_id : uuid
+  + type_id : uuid
+}
+
+entity "Module" as modules {
+  + id : uuid
+  + name : text
+  + device_id : uuid
+  + type : enum
+}
+
+entity "Sensor" as sensors {
+  + id : uuid
+  + name : text
+  + module_id : uuid
+  + type : enum
+  + value : double
+  + status : enum
+}
+
+entity "Temperature" as temperature {
+  + id : uuid
+  + sensor_id : uuid
+  + timestamp : datetime
+  + value : double
+}
+
+entity "Alert" as alerts {
+  + id : uuid
+  + device_id : uuid
+  + sensor_id : uuid
+  + type : enum
+  + severity : enum
+  + message : text
+  + status : enum
+}
+
+users ||--o{ houses
+houses ||--o{ router
+device_types ||--o{ devices
+
+router ||--o{ modules
+modules ||--o{ devices
+modules ||--o{ sensors
+sensors ||--o{ temperature
+
+devices ||--o{ alerts
+sensors ||--o{ alerts
+
+@enduml

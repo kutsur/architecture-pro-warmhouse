@@ -1,0 +1,30 @@
+@startuml
+title Компонентная диаграмма - Client приложения
+
+top to bottom direction
+
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+
+Container_Boundary(client_apps, "Client приложения") {
+  Component(ui_layer, "UI Layer", "React / React Native", "Отображение интерфейса и взаимодействие с пользователем")
+  Component(state_management, "State Management", "RTK / Redux", "Хранение состояния приложения")
+  Component(api_client, "API Client", "REST / WebSocket", "Работа с backend API и подписка на обновления")
+  Component(auth_module, "Auth Module", "Auth0 SDK", "Логин, logout, хранение токенов")
+  Component(device_module, "Device Module", "Feature module", "Работа с устройствами и их состоянием")
+}
+
+System_Ext(entry_point, "API Entry Point", "Backend Gateway")
+
+Rel(ui_layer, state_management, "Обновляет / читает состояние")
+Rel(ui_layer, auth_module, "Инициирует авторизацию")
+Rel(ui_layer, device_module, "Управление устройствами")
+
+Rel(state_management, api_client, "Запросы / кэш")
+
+Rel(auth_module, api_client, "Добавляет токены")
+
+Rel(device_module, api_client, "Получает / отправляет данные")
+
+Rel(api_client, entry_point, "REST / WebSocket")
+
+@enduml

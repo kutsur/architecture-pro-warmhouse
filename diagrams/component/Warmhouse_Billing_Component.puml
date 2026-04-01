@@ -1,0 +1,35 @@
+@startuml
+title Компонентная диаграмма - Микросервис биллинга
+
+top to bottom direction
+
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+
+Container_Boundary(billing_microservice, "Микросервис биллинга") {
+  Component(api_controller, "API Controller", "Spring Boot", "Принимает запросы на оплату и проверку статуса")
+  Component(billing_service, "Billing Service", "Java", "Основная логика оплаты и управления подписками")
+  Component(payment_provider, "Payment Provider Adapter", "YandexKassa/Stripe SDK", "Интеграция с внешними платежными системами")
+  Component(subscription_manager, "Subscription Manager", "Java", "Управляет подписками и их статусом")
+  Component(user_repository, "User Repository", "PostgreSQL", "Работа с данными пользователя и подписками")
+}
+
+System_Ext(entry_point, "API Entry Point", "Gateway")
+System_Ext(user_database, "User Database", "PostgreSQL")
+System_Ext(emails_microservice, "Emails Microservice", "PHP")
+System_Ext(payment_system, "Payment System", "3rd party например YandexKassa")
+
+Rel(entry_point, api_controller, "REST")
+
+Rel(api_controller, billing_service, "Вызывает")
+
+Rel(billing_service, payment_provider, "Создает платеж / проверяет статус")
+Rel(payment_provider, payment_system, "API")
+
+Rel(billing_service, subscription_manager, "Управляет подписками")
+
+Rel(subscription_manager, user_repository, "Чтение / запись")
+Rel(user_repository, user_database, "SQL")
+
+Rel(billing_service, emails_microservice, "Отправка уведомлений")
+
+@enduml

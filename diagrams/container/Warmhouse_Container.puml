@@ -1,0 +1,51 @@
+@startuml
+title Диаграмма контейнера для компании "Теплый дом"
+
+top to bottom direction
+
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+
+Person(user, "User", "Пользователь системы Теплый дом")
+System(warmhouse_client, "Система теплый дом", "Система позволяет управлять датчиками, читать с них информацию и управлять устройствами в домах")
+
+Container_Boundary(warmhouse_client, "Приложения Теплого дома") {
+  Container(webapp, "Web приложение", "React, RTK", "Позволяет пользователю управлять и иметь актуальный статус для девайсов и датчиков")
+  Container(mobile, "Мобильные приложения", "Android, IOS", "Позволяет пользователю управлять и иметь актуальный статус для девайсов и датчиков")
+}
+
+System(warmhouse_backend, "Backend part", "Отвечает за работу с базой данных и контракты с клиентом")
+Container_Boundary(warmhouse_backend, "Приложения Теплого дома") {
+  Container(entry_point, "API Entry point", "NodeJS, REST, Websockets", "Одна общая точка входа для взаимодействия с микросервисами")
+  Container(auth_microservice, "Микросервис авторизации", "Auth0, NestJS", "Отвечает за авторизацию пользователя и хранение сессии")
+  Container(emails_microservice, "Микросервис работы с письмами", "PHP, SMTP", "Отвечает за оповещение пользователя важных данных с помощью Email")
+  Container(billing_microservice, "Микросервис оплаты", "Java, Spring", "Отвечает за оплату подписок или покупки / установки новых девайсов")
+  Container(user_database, "База данных пользователя", "PostgreSQL", "Хранит данные пользователя, сессии, актуальность подписки, id девайсов")
+  Container(devices_database, "База данных устройств", "PostgreSQL", "Хранит все используемые девайсы и их статус")
+  Container(devices_microservice, "Микросервис работы с устройствами", "GO, Websockets", "Позволяет включать и выключать девайсы и получать актуальность данных")
+  Container(worker_microservice, "Микросервис мониторинга и обновления данных", "GO, Websockets", "Процесс который проверяет актуальность датчиков, контроля температуры и получения ошибок")
+}
+
+System_Ext(sensor, "Датчик", "Сущность")
+System_Ext(device, "Устройство", "Сущность")
+
+Rel(user, webapp, "Пользуется системой")
+Rel(user, mobile, "Пользуется системой")
+
+Rel(mobile, entry_point, "API Запросы")
+Rel(webapp, entry_point, "API Запросы")
+
+Rel(entry_point, auth_microservice, "Получает данные пользователя")
+Rel(entry_point, billing_microservice, "Отправляет запросы на оплату и их статус")
+Rel(entry_point, devices_microservice, "Получает данные устройств")
+
+Rel(worker_microservice, devices_database, "Получает данные устройств и обновляет их статус")
+Rel(auth_microservice, user_database, "Получает акуальные данные пользователя")
+Rel(billing_microservice, user_database, "Получает данные подписки пользователя")
+Rel(billing_microservice, emails_microservice, "Позволяет отправлять успех или ошибки с оплатой пользователю")
+Rel(devices_microservice, emails_microservice, "Позволяет отправлять успех или ошибки с девайсами пользователя")
+
+Rel(devices_microservice, worker_microservice, 'Получает последний статус устройства при запрос, управляет включение и отключением устройств')
+Rel(worker_microservice, sensor, "Получает данные")
+Rel(worker_microservice, device, 'Получает данные')
+
+@enduml

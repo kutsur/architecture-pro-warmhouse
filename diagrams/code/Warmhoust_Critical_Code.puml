@@ -1,0 +1,69 @@
+@startuml
+title Warmhouse - Критические компоненты, диаграмма кода
+
+top to bottom direction
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+
+package "Управление устройствами" {
+
+  class Device {
+    +UUID id
+    +String name
+    +DeviceState state
+    +void turnOn()
+    +void turnOff()
+    +void toggle()
+  }
+
+  class DeviceService {
+    +DeviceState getState(UUID deviceId)
+    +void turnOn(UUID deviceId)
+    +void turnOff(UUID deviceId)
+    +void toggle()
+  }
+
+  class DeviceRepository {
+    +Device find(UUID id)
+    +void save(Device device)
+  }
+
+  class DeviceGateway {
+    +void sendTurnOn(UUID deviceId)
+    +void sendTurnOff(UUID deviceId)
+    +void sendToggle(UUID deviceId)
+    +DeviceState fetchState(UUID deviceId)
+  }
+
+  DeviceService --> DeviceRepository
+  DeviceService --> DeviceGateway
+  DeviceRepository --> Device
+}
+
+package "Мониторинг" {
+
+  class Sensor {
+    +UUID id
+    +SensorType type
+    +double value
+    +boolean status
+  }
+
+  class MonitoringService {
+    +void poll()
+    +void analyze()
+  }
+
+  class AlertManager {
+    +void triggerAlert(String message)
+  }
+
+  class SensorGateway {
+    +Sensor read(UUID sensorId)
+  }
+
+  MonitoringService --> SensorGateway
+  MonitoringService --> AlertManager
+  SensorGateway --> Sensor
+}
+
+@enduml
